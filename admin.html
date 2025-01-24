@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .admin-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .button.red {
+            background: #ff4444;
+        }
+
+        .input-group {
+            margin: 10px 0;
+        }
+
+        input {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            margin-right: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-buttons {
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .tab-button.active {
+            background: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Add login form -->
+        <div id="loginForm" class="admin-card">
+            <h2>Admin Login</h2>
+            <div class="input-group">
+                <input type="text" id="adminId" placeholder="Admin ID">
+                <input type="password" id="adminPassword" placeholder="Password">
+                <button class="button" onclick="login()">Login</button>
+            </div>
+        </div>
+
+        <!-- Wrap existing admin content in hidden div -->
+        <div id="adminContent" style="display: none;">
+            <h1>Admin Control Panel</h1>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('users')">Users</button>
+                <button class="tab-button" onclick="showTab('keys')">keys</button>
+                <button class="tab-button" onclick="showTab('referrals')">Referrals</button>
+                <button class="tab-button" onclick="showTab('settings')">Settings</button>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="usersTab" class="admin-card">
+                <h2>User Management</h2>
+                <div class="input-group">
+                    <input type="text" id="userId" placeholder="User ID">
+                    <input type="number" id="keys" placeholder="keys">
+                    <button class="button" onclick="modifyUserkeys()">Modify keys</button>
+                    <button class="button red" onclick="resetUser()">Reset User</button>
+                </div>
+                <table id="usersTable">
+                    <tr>
+                        <th>User ID</th>
+                        <th>Balance</th>
+                        <th>Referrals</th>
+                        <th>Actions</th>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- keys Tab -->
+            <div id="keysTab" class="admin-card" style="display: none;">
+                <h2>key Management</h2>
+                <div class="input-group">
+                    <input type="number" id="globalkeys" placeholder="Amount">
+                    <button class="button" onclick="modifyGlobalkeys()">Add Global keys</button>
+                    <button class="button red" onclick="resetAllkeys()">Reset All keys</button>
+                </div>
+                <div id="keyStats"></div>
+            </div>
+
+            <!-- Referrals Tab -->
+            <div id="referralsTab" class="admin-card" style="display: none;">
+                <h2>Referral Management</h2>
+                <div class="input-group">
+                    <input type="number" id="referralBonus" placeholder="New bonus amount">
+                    <button class="button" onclick="updateReferralBonus()">Update Bonus</button>
+                </div>
+                <table id="referralsTable">
+                    <tr>
+                        <th>Referrer</th>
+                        <th>Referred</th>
+                        <th>Bonus</th>
+                        <th>Date</th>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="admin-card" style="display: none;">
+                <h2>System Settings</h2>
+                <div class="input-group">
+                    <button class="button" onclick="backupData()">Backup Data</button>
+                    <button class="button" onclick="restoreData()">Restore Data</button>
+                    <button class="button red" onclick="resetSystem()">Reset System</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add login functionality
+        function checkCredentials(id, password) {
+            // In production, this should be handled securely on the server side
+            return id === 'vipul2252' && password === 'v@i@p@u@l@2252';
+        }
+
+        function login() {
+            const id = document.getElementById('adminId').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (checkCredentials(id, password)) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                sessionStorage.setItem('adminLoggedIn', 'true');
+            } else {
+                alert('Invalid credentials');
+            }
+        }
+
+        // Check login status on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+            }
+            loadUsers();
+            loadkeyStats();
+        });
+
+        // Add logout functionality
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            location.reload();
+        }
+
+        // Show selected tab
+        function showTab(tabName) {
+            const tabs = ['users', 'keys', 'referrals', 'settings'];
+            tabs.forEach(tab => {
+                document.getElementById(tab + 'Tab').style.display = tab === tabName ? 'block' : 'none';
+            });
+            
+            // Update active button
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+                if(button.textContent.toLowerCase() === tabName) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        // Modify user keys
+        function modifyUserkeys() {
+            const userId = document.getElementById('userId').value;
+            const keys = parseInt(document.getElementById('keys').value);
+            
+            if(userId && !isNaN(keys)) {
+                let balance = parseInt(localStorage.getItem('userBalance')) || 0;
+                balance += keys;
+                localStorage.setItem('userBalance', balance);
+                alert(`Updated balance: ${balance} keys`);
+                loadUsers();
+            }
+        }
+
+        // Reset user
+        function resetUser() {
+            const userId = document.getElementById('userId').value;
+            if(userId && confirm('Are you sure you want to reset this user?')) {
+                localStorage.setItem('userBalance', '0');
+                localStorage.removeItem('friends');
+                localStorage.removeItem('transactions');
+                alert('User reset successfully');
+                loadUsers();
+            }
+        }
+
+        // Modify global keys
+        function modifyGlobalkeys() {
+            const amount = parseInt(document.getElementById('globalkeys').value);
+            if(!isNaN(amount)) {
+                let balance = parseInt(localStorage.getItem('userBalance')) || 0;
+                balance += amount;
+                localStorage.setItem('userBalance', balance);
+                alert(`Global keys updated: ${balance}`);
+                loadkeyStats();
+            }
+        }
+
+        // Reset all keys
+        function resetAllkeys() {
+            if(confirm('Are you sure you want to reset all keys?')) {
+                localStorage.setItem('userBalance', '0');
+                alert('All keys reset');
+                loadkeyStats();
+            }
+        }
+
+        // Update referral bonus
+        function updateReferralBonus() {
+            const bonus = parseInt(document.getElementById('referralBonus').value);
+            if(!isNaN(bonus)) {
+                localStorage.setItem('referralBonus', bonus);
+                alert(`Referral bonus updated to ${bonus} keys`);
+            }
+        }
+
+        // Backup data
+        function backupData() {
+            const data = {
+                balance: localStorage.getItem('userBalance'),
+                friends: localStorage.getItem('friends'),
+                transactions: localStorage.getItem('transactions')
+            };
+            const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'backup_' + new Date().toISOString() + '.json';
+            a.click();
+        }
+
+        // Reset system
+        function resetSystem() {
+            if(confirm('Are you sure you want to reset the entire system? This cannot be undone!')) {
+                localStorage.clear();
+                alert('System reset complete');
+                location.reload();
+            }
+        }
+
+        // Load users
+        function loadUsers() {
+            const table = document.getElementById('usersTable');
+            const balance = parseInt(localStorage.getItem('userBalance')) || 0;
+            const friends = JSON.parse(localStorage.getItem('friends') || '[]');
+            
+            table.innerHTML = `
+                <tr>
+                    <th>User ID</th>
+                    <th>Balance</th>
+                    <th>Referrals</th>
+                    <th>Actions</th>
+                </tr>
+                <tr>
+                    <td>User1</td>
+                    <td>${balance.toLocaleString()} keys</td>
+                    <td>${friends.length}</td>
+                    <td>
+                        <button class="button" onclick="viewDetails('User1')">View</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Load key stats
+        function loadkeyStats() {
+            const stats = document.getElementById('keyStats');
+            const balance = parseInt(localStorage.getItem('userBalance')) || 0;
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            
+            stats.innerHTML = `
+                <h3>Statistics</h3>
+                <p>Total keys: ${balance.toLocaleString()}</p>
+                <p>Total Transactions: ${transactions.length}</p>
+            `;
+        }
+    </script>
+</body>
+</html> 

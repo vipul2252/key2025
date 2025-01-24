@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 0;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .wallet-container {
+            max-width: 600px;
+            margin: 80px auto 20px;
+            padding: 20px;
+        }
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .balance-title {
+            font-size: 18px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            color: #FFD700;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .transaction-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .transaction-info {
+            flex-grow: 1;
+        }
+
+        .transaction-description {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .transaction-date {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .transaction-amount.debit {
+            color: #ff4444;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <div class="nav-menu">
+            <div class="nav-item" onclick="window.location.href='home.html'">
+                <i class="nav-icon">🏠</i>
+                <span>HOME</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='leaderboard.html'">
+                <i class="nav-icon">🏆</i>
+                <span>LEAD</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='invite-friends.html'">
+                <i class="nav-icon">👥</i>
+                <span>FRIENDS</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='task.html'">
+                <i class="nav-icon">✅</i>
+                <span>TASKS</span>
+            </div>
+            <div class="nav-item"onclick="window.location.href='wallet.html'">
+                <i class="nav-icon">💰</i>
+                <span id="balance">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="wallet-container">
+        <div class="balance-card">
+            <div class="balance-title">Total Balance</div>
+            <div class="balance-amount" id="totalBalance">0</div>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-title">Today's Earnings</div>
+                <div class="stat-value" id="todayEarnings">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Earnings</div>
+                <div class="stat-value" id="totalEarnings">0</div>
+            </div>
+        </div>
+
+        <div class="transaction-list" id="transactionList">
+            <!-- Transactions will be added here -->
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(num) {
+            return num.toLocaleString();
+        }
+
+        function updateWallet() {
+            // Get all transactions
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            
+            // Calculate totals
+            let totalBalance = parseInt(localStorage.getItem('userBalance')) || 0;
+            let totalEarnings = 0;
+            let todayEarnings = 0;
+            
+            const today = new Date().toDateString();
+            
+            // Process transactions
+            transactions.forEach(transaction => {
+                const amount = parseInt(transaction.amount) || 0;
+                const transactionDate = new Date(transaction.date).toDateString();
+                
+                // Calculate total earnings
+                if (transaction.type === 'earn') {
+                    totalEarnings += amount;
+                    
+                    // Calculate today's earnings
+                    if (transactionDate === today) {
+                        todayEarnings += amount;
+                    }
+                }
+            });
+
+            // Update displays
+            document.getElementById('totalBalance').textContent = formatNumber(totalBalance);
+            document.getElementById('totalEarnings').textContent = formatNumber(totalEarnings);
+            document.getElementById('todayEarnings').textContent = formatNumber(todayEarnings);
+
+            // Display transactions
+            const transactionList = document.getElementById('transactionList');
+            transactionList.innerHTML = '';
+
+            // Sort transactions by date (newest first)
+            transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            transactions.forEach(transaction => {
+                const transactionEl = document.createElement('div');
+                transactionEl.className = 'transaction-item';
+                
+                const amount = parseInt(transaction.amount) || 0;
+                const date = new Date(transaction.date);
+                
+                transactionEl.innerHTML = `
+                    <div class="transaction-info">
+                        <div class="transaction-description">${transaction.description}</div>
+                        <div class="transaction-date">${date.toLocaleString()}</div>
+                    </div>
+                    <div class="transaction-amount ${transaction.type === 'spend' ? 'debit' : ''}">
+                        ${transaction.type === 'spend' ? '-' : '+'}${formatNumber(amount)}
+                    </div>
+                `;
+                
+                transactionList.appendChild(transactionEl);
+            });
+        }
+
+        // Initialize wallet
+        document.addEventListener('DOMContentLoaded', updateWallet);
+
+        // Function to add new transaction (call this from other pages)
+        function addTransaction(description, amount, type = 'earn') {
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            transactions.push({
+                description,
+                amount,
+                type,
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+    </script>
+</body>
+</html> 

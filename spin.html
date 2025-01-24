@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Win key</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 0;
+        }
+
+        .nav-menu {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .spin-container {
+            margin-top: 80px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .wheel-container {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            position: relative;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            padding: 10px;
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: #FFD700;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 2;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                #FF6B6B,
+                #4ECDC4,
+                #45B7D1,
+                #96CEB4,
+                #FFEEAD,
+                #FFD93D,
+                #FF6F69,
+                #4ECDC4
+            );
+            position: relative;
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+
+        .wheel::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .wheel-text {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        .spin-button {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .spin-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .spin-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .result-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+            border: 2px solid #FFD700;
+            animation: popIn 0.5s ease-out;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .nav-icon {
+            font-size: 18px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+        }
+
+        #balance {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        #winAmount {
+            font-size: 24px;
+            color: #FFD700;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <div class="nav-menu">
+            <div class="nav-item" onclick="window.location.href='home.html'">
+                <i class="nav-icon">🏠</i>
+                <span>HOME</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='leaderboard.html'">
+                <i class="nav-icon">🏆</i>
+                <span>LEAD</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='friends.html'">
+                <i class="nav-icon">👥</i>
+                <span>FRIENDS</span>
+            </div>
+            <div class="nav-item" onclick="window.location.href='task.html'">
+                <i class="nav-icon">✅</i>
+                <span>TASKS</span>
+            </div>
+            <div class="nav-item">
+                <i class="nav-icon">💰</i>
+                <span id="balance"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="spin-container">
+        <h1>Spin & Win</h1>
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="wheel">
+                <!-- Wheel segments will be added by JavaScript -->
+            </div>
+        </div>
+        <button class="spin-button" onclick="spinWheel()">SPIN NOW</button>
+    </div>
+
+    <div class="result-popup" id="resultPopup">
+        <h2>🎉 Congratulations! 🎉</h2>
+        <p id="winAmount"></p>
+        <button onclick="closePopup()" class="spin-button">COLLECT</button>
+    </div>
+
+    <script>
+        let spinning = false;
+        const wheel = document.getElementById('wheel');
+        const popup = document.getElementById('resultPopup');
+        const winAmountText = document.getElementById('winAmount');
+        const rewards = [10, 20, 50, 100, 50, 15, 30, 75];
+        
+        // Get current balance
+        function getCurrentBalance() {
+            return parseInt(document.getElementById('balance').textContent) || 0;
+        }
+
+        // Update balance
+        function updateBalance(amount) {
+            const balanceElement = document.getElementById('balance');
+            const currentBalance = getCurrentBalance();
+            const newBalance = currentBalance + amount;
+            balanceElement.textContent = newBalance;
+            
+            // Save to localStorage
+            localStorage.setItem('userBalance', newBalance);
+        }
+
+        // Load balance from localStorage
+        function loadBalance() {
+            const savedBalance = localStorage.getItem('userBalance');
+            if (savedBalance) {
+                document.getElementById('balance').textContent = savedBalance;
+            }
+        }
+
+        // Initialize balance on page load
+        document.addEventListener('DOMContentLoaded', loadBalance);
+
+        // Add wheel segments text
+        for(let i = 0; i < 8; i++) {
+            const text = document.createElement('div');
+            text.className = 'wheel-text';
+            text.style.transform = `rotate(${i * 45}deg)`;
+            text.textContent = rewards[i];
+            wheel.appendChild(text);
+        }
+
+        function spinWheel() {
+            if (spinning) return;
+            spinning = true;
+            
+            const spinButton = document.querySelector('.spin-button');
+            spinButton.disabled = true;
+            
+            const rotations = 5 + Math.random() * 5;
+            const degrees = rotations * 360 + Math.floor(Math.random() * 8) * (360/8);
+            
+            wheel.style.transform = `rotate(${degrees}deg)`;
+            
+            const finalDegree = degrees % 360;
+            const segmentSize = 360 / 8;
+            const winningIndex = Math.floor((360 - (finalDegree % 360)) / segmentSize);
+            const winAmount = rewards[winningIndex % 8];
+            
+            setTimeout(() => {
+                // Update win amount display
+                winAmountText.textContent = `You won ${winAmount} keys! 🎁`;
+                
+                // Update balance and record transaction
+                const currentBalance = parseInt(document.getElementById('balance').textContent) || 0;
+                const newBalance = currentBalance + winAmount;
+                
+                // Update balance displays
+                document.getElementById('balance').textContent = newBalance;
+                localStorage.setItem('userBalance', newBalance);
+
+                // Record transaction in wallet
+                const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+                transactions.push({
+                    description: 'Spin Wheel Reward',
+                    amount: winAmount,
+                    type: 'earn',
+                    date: new Date().toISOString()
+                });
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                
+                // Show popup
+                popup.style.display = 'block';
+                spinning = false;
+                spinButton.disabled = false;
+            }, 3000);
+        }
+
+        function closePopup() {
+            popup.style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

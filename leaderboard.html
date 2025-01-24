@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 0;
+        }
+
+        .game-container {
+            padding-top: 80px;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 20px;
+            margin: 20px;
+        }
+
+        .card {
+            background: #4CAF50;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .card.flipped {
+            background: #FFD700;
+            transform: rotateY(180deg);
+        }
+
+        .game-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        .start-button {
+            background: #4CAF50;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .win-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <div class="nav-menu">
+            <div class="nav-item" onclick="window.location.href='home.html'">
+                <i class="nav-icon">🏠</i>
+                <span>HOME</span>
+            </div>
+            <div class="nav-item">
+                <i class="nav-icon">💰</i>
+                <span id="balance">0</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <h1>Memory Game</h1>
+        <div class="game-info">
+            <div>Level: <span id="level">1</span></div>
+            <div>Pairs Found: <span id="pairs">0</span></div>
+            <div>key: <span id="keys">0</span></div>
+        </div>
+        <div class="game-board" id="gameBoard"></div>
+        <button class="start-button" onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="win-popup" id="winPopup">
+        <h2>Level Complete! 🎉</h2>
+        <p>You earned <span id="earnedkeys">0</span> key!</p>
+        <button class="start-button" onclick="nextLevel()">Next Level</button>
+    </div>
+
+    <script>
+        let level = 1;
+        let pairs = 0;
+        let keys = 0;
+        let cards = [];
+        let flippedCards = [];
+        let canFlip = true;
+
+        function startGame() {
+            pairs = 0;
+            document.getElementById('pairs').textContent = pairs;
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.innerHTML = '';
+            
+            const numberOfPairs = level + 3;
+            cards = [];
+            
+            for(let i = 0; i < numberOfPairs; i++) {
+                cards.push(i, i);
+            }
+            
+            // Shuffle cards
+            cards.sort(() => Math.random() - 0.5);
+            
+            cards.forEach((value, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.value = value;
+                card.dataset.index = index;
+                card.onclick = () => flipCard(card);
+                gameBoard.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            if(!canFlip || card.classList.contains('flipped')) return;
+            
+            card.classList.add('flipped');
+            card.textContent = card.dataset.value;
+            flippedCards.push(card);
+            
+            if(flippedCards.length === 2) {
+                canFlip = false;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const match = card1.dataset.value === card2.dataset.value;
+            
+            setTimeout(() => {
+                if(match) {
+                    pairs++;
+                    document.getElementById('pairs').textContent = pairs;
+                    
+                    if(pairs === level + 3) {
+                        levelComplete();
+                    }
+                } else {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.textContent = '';
+                    card2.textContent = '';
+                }
+                
+                flippedCards = [];
+                canFlip = true;
+            }, 1000);
+        }
+
+        function levelComplete() {
+            const earnedkeys = level * 100;
+            keys += earnedkeys;
+            document.getElementById('keys').textContent = keys;
+            document.getElementById('earnedkeys').textContent = earnedkeys;
+            document.getElementById('winPopup').style.display = 'block';
+            
+            // Update balance
+            updateBalance(earnedkeys);
+        }
+
+        function nextLevel() {
+            level++;
+            document.getElementById('level').textContent = level;
+            document.getElementById('winPopup').style.display = 'none';
+            startGame();
+            
+            if(level > 10) {
+                alert('Congratulations! You completed all levels! Bonus 1000 keys!');
+                updateBalance(1000);
+                level = 1;
+                document.getElementById('level').textContent = level;
+            }
+        }
+
+        function updateBalance(amount) {
+            const currentBalance = parseInt(localStorage.getItem('userBalance')) || 0;
+            const newBalance = currentBalance + amount;
+            
+            localStorage.setItem('userBalance', newBalance);
+            document.getElementById('balance').textContent = newBalance;
+            
+            // Record transaction
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            transactions.push({
+                description: `Memory Game Level ${level}`,
+                amount: amount,
+                type: 'earn',
+                date: new Date().toISOString(),
+                source: 'memorygame'
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentBalance = localStorage.getItem('userBalance') || 0;
+            document.getElementById('balance').textContent = currentBalance;
+        });
+    </script>
+</body>
+</html>

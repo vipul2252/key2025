@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refer & Earn</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a1a2e;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .referral-card {
+            background: #242444;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .referral-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .referral-title {
+            font-size: 28px;
+            color: #f19e36;
+            margin: 0;
+        }
+
+        .referral-subtitle {
+            color: #B0C4DE;
+            margin-top: 10px;
+        }
+
+        .reward-boxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .reward-box {
+            background: #2a2a4a;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .reward-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .reward-amount {
+            font-size: 20px;
+            color: #f19e36;
+            margin: 8px 0;
+        }
+
+        .code-section {
+            background: #2a2a4a;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .code-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a1a2e;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        #referralCode {
+            font-size: 20px;
+            font-family: monospace;
+            color: #f19e36;
+        }
+
+        button {
+            background: #f19e36;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #e08f25;
+        }
+
+        .input-section {
+            margin: 20px 0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #2a2a4a;
+            color: white;
+            font-size: 16px;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #2a2a4a;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            color: #f19e36;
+            margin: 8px 0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 24px;
+            border-radius: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <body>
+        <a href="javascript:history.back()" class="back-button">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 19L5 12L12 5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a> 
+    <div class="container">
+        <div class="referral-card">
+            <div class="referral-header">
+                <h1 class="referral-title">Refer & Earn</h1>
+                <p class="referral-subtitle">Invite friends and earn rewards</p>
+            </div>
+
+            <div class="reward-boxes">
+                <div class="reward-box">
+                    <div class="reward-icon">🎁</div>
+                    <div class="reward-amount">5,000 keys</div>
+                    <p>Per Referral</p>
+                </div>
+                <div class="reward-box">
+                    <div class="reward-icon">⭐</div>
+                    <div class="reward-amount">10,000 keys</div>
+                    <p>At 5 Referrals</p>
+                </div>
+                <div class="reward-box">
+                    <div class="reward-icon">👑</div>
+                    <div class="reward-amount">20,000 keys</div>
+                    <p>At 10 Referrals</p>
+                </div>
+            </div>
+
+            <div class="code-section">
+                <h3>Your Referral Code</h3>
+                <div class="code-display">
+                    <span id="referralCode"></span>
+                    <button onclick="copyCode()">Copy Code</button>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h3>Enter Friend's Code</h3>
+                <div class="input-group">
+                    <input type="text" id="friendCode" placeholder="Enter referral code">
+                    <button onclick="submitReferral()">Submit</button>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-box">
+                    <h3>Total Referrals</h3>
+                    <div class="stat-value" id="totalReferrals">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>keys Earned</h3>
+                    <div class="stat-value" id="keysEarned">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function initReferralSystem() {
+            let referralCode = localStorage.getItem('referralCode');
+            if (!referralCode) {
+                referralCode = generateReferralCode();
+                localStorage.setItem('referralCode', referralCode);
+            }
+            document.getElementById('referralCode').textContent = referralCode;
+            updateStats();
+        }
+
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function copyCode() {
+            const code = document.getElementById('referralCode').textContent;
+            navigator.clipboard.writeText(code);
+            showNotification('Code copied!');
+        }
+
+        function submitReferral() {
+            const friendCode = document.getElementById('friendCode').value.trim().toUpperCase();
+            
+            if (!friendCode) {
+                showNotification('Please enter a code');
+                return;
+            }
+
+            if (friendCode === localStorage.getItem('referralCode')) {
+                showNotification('Cannot use own code');
+                return;
+            }
+
+            const usedCodes = JSON.parse(localStorage.getItem('usedCodes') || '[]');
+            if (usedCodes.includes(friendCode)) {
+                showNotification('Code already used');
+                return;
+            }
+
+            const referrals = parseInt(localStorage.getItem('referrals') || '0');
+            const keysEarned = parseInt(localStorage.getItem('referralkeys') || '0');
+            let reward = 5000;
+
+            if (referrals + 1 === 5) reward += 10000;
+            if (referrals + 1 === 10) reward += 20000;
+
+            localStorage.setItem('referrals', referrals + 1);
+            localStorage.setItem('referralkeys', keysEarned + reward);
+            
+            let totalkeys = parseInt(localStorage.getItem('keys') || '0');
+            localStorage.setItem('keys', totalkeys + reward);
+
+            usedCodes.push(friendCode);
+            localStorage.setItem('usedCodes', JSON.stringify(usedCodes));
+
+            updateStats();
+            document.getElementById('friendCode').value = '';
+            showNotification(`Earned ${reward} keys!`);
+        }
+
+        function updateStats() {
+            const referrals = localStorage.getItem('referrals') || '0';
+            const keysEarned = localStorage.getItem('referralkeys') || '0';
+            
+            document.getElementById('totalReferrals').textContent = referrals;
+            document.getElementById('keysEarned').textContent = keysEarned;
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+
+        initReferralSystem();
+    </script>
+</body>
+</html>
+

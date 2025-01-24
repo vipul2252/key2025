@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            font-family: Arial, sans-serif;
+            perspective: 1000px;
+        }
+
+        .task-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            transform-style: preserve-3d;
+            margin-top: 20px;
+        }
+
+        .task-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: translateZ(20px);
+            transition: transform 0.3s ease;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .task-card:hover {
+            transform: translateZ(30px) scale(1.02);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .key-reward {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transform: translateZ(10px);
+        }
+
+        .task-description {
+            color: #e0e0e0;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .task-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transform: translateZ(15px);
+            transition: transform 0.3s ease;
+        }
+
+        .task-button:hover {
+            transform: translateZ(25px) scale(1.05);
+        }
+
+        .task-button:active {
+            transform: translateZ(15px) scale(0.98);
+        }
+
+        .completed {
+            background: linear-gradient(45deg, #666, #444);
+            cursor: not-allowed;
+        }
+
+        .completed:hover {
+            transform: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateX(0); }
+            50% { transform: translateY(-10px) rotateX(2deg); }
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+            transform: translateZ(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .back-button:hover {
+            transform: translateZ(20px) scale(1.05);
+        }
+
+        .youtube-card {
+            background: linear-gradient(145deg, rgba(255, 0, 0, 0.1), rgba(200, 0, 0, 0.2));
+            border: 1px solid rgba(0, 255, 34, 0.2);
+        }
+
+        .youtube-icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .youtube-button {
+            background: linear-gradient(45deg, #FF0000, #CC0000);
+        }
+
+        .youtube-button:hover {
+            background: linear-gradient(45deg, #CC0000, #AA0000);
+        }
+
+        .daily-scheme {
+            background: linear-gradient(145deg, rgba(41, 98, 255, 0.1), rgba(0, 89, 255, 0.2));
+            border: 1px solid rgba(41, 98, 255, 0.2);
+        }
+
+        .ripple-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+            perspective: 1000px;
+        }
+
+        .ripple-day {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .ripple-day:hover {
+            transform: translateZ(20px) scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .ripple-day.claimed {
+            background: rgba(76, 175, 80, 0.3);
+            cursor: not-allowed;
+        }
+
+        .ripple-day.locked {
+            background: rgba(128, 128, 128, 0.2);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .ripple-day .day {
+            font-size: 14px;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .ripple-day .keys {
+            font-size: 16px;
+            color: #FFD700;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .ripple-day.special {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.3));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .claimed-animation {
+            animation: claimPop 0.5s ease-out;
+        }
+
+        @keyframes claimPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .balance-container {
+            text-align: center;
+            margin-top: 80px;
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+
+        .balance-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-title {
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .balance-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .key-icon {
+            font-size: 30px;
+        }
+    </style>
+</head>
+
+        
+        <div class="task-card">
+            <div class="task-header">
+                <div class="task-title">Share App</div>
+                <div class="key-reward">+200 keys</div>
+            </div>
+            <div class="task-description">Share our app with your friends</div>
+            <button class="task-button" onclick="shareApp()">Share</button>
+        </div>
+    </div>
+
+    
+
+    <script>
+        // Get current balance
+        function getCurrentBalance() {
+            return parseInt(localStorage.getItem('userBalance')) || 0;
+        }
+
+        // Update balance and record transaction
+        function updateBalanceAndTransaction(amount, description) {
+            // Update balance
+            const currentBalance = getCurrentBalance();
+            const newBalance = currentBalance + amount;
+            localStorage.setItem('userBalance', newBalance);
+
+            // Update display
+            document.getElementById('balance').textContent = newBalance;
+            if (document.getElementById('totalBalance')) {
+                document.getElementById('totalBalance').textContent = newBalance.toLocaleString();
+            }
+
+            // Record transaction
+            const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+            transactions.push({
+                description: description,
+                amount: amount,
+                type: 'earn',
+                date: new Date().toISOString(),
+                source: 'task'  // Add source identifier
+            });
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+
+            // Update daily earnings
+            const today = new Date().toDateString();
+            const dailyEarnings = JSON.parse(localStorage.getItem('dailyEarnings') || '{}');
+            if (!dailyEarnings[today]) {
+                dailyEarnings[today] = 0;
+            }
+            dailyEarnings[today] += amount;
+            localStorage.setItem('dailyEarnings', JSON.stringify(dailyEarnings));
+        }
+
+        // Task completion tracking
+        const completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '{}');
+        const today = new Date().toDateString();
+
+        function isTaskCompletedToday(taskId) {
+            return completedTasks[taskId] === today;
+        }
+
+        function markTaskCompleted(taskId) {
+            completedTasks[taskId] = today;
+            localStorage.setItem('completedTasks', JSON.stringify(completedTasks));
+        }
+
+        function watchVideo() {
+            if (isTaskCompletedToday('video')) {
+                alert('You have already completed this task today!');
+                return;
+            }
+
+            // Simulate video watching
+            setTimeout(() => {
+                const amount = 50;
+                updateBalanceAndTransaction(amount, 'Watch Video Task Completed');
+                markTaskCompleted('video');
+                alert(`Congratulations! You earned ${amount} keys!`);
+                
+                // Update button state
+                const button = document.querySelector('[onclick="watchVideo()"]');
+                button.classList.add('completed');
+                button.textContent = 'Completed';
+                button.disabled = true;
+            }, 1000);
+        }
+
+        function shareApp() {
+            if (isTaskCompletedToday('share')) {
+                alert('You have already completed this task today!');
+                return;
+            }
+
+            // Define the content to share
+            const shareData = {
+                title: 'Earn Free Keys',
+                text: 'Join me to earn free keys! Check out this awesome app!',
+                url: 'https://vipul2252.github.io/key/home.html'
+            };
+
+            if (navigator.share) {
+                // For mobile devices that support native sharing
+                navigator.share(shareData)
+                    .then(() => {
+                        completeShareTask();
+                    })
+                    .catch((error) => {
+                        // Fallback for when share is cancelled or fails
+                        console.error('Error sharing:', error);
+                        completeShareTask(); // Still reward the user
+                    });
+            } else {
+                // Fallback for desktop or devices that don't support native sharing
+                completeShareTask();
+            }
+        }
+
+        function completeShareTask() {
+            const amount = 200;
+            updateBalanceAndTransaction(amount, 'Share App Task Completed');
+            markTaskCompleted('share');
+            alert(`Congratulations! You earned ${amount} keys!`);
+            
+            // Update button state
+            const button = document.querySelector('[onclick="shareApp()"]');
+            button.classList.add('completed');
+            button.textContent = 'Completed';
+            button.disabled = true;
+        }
+
+        function openYouTube() {
+            if (isTaskCompletedToday('youtube')) {
+                alert('You have already completed this task today!');
+                return;
+            }
+
+            // Open YouTube in new tab
+            window.open('CHANNEL_URL', '_blank');
+            
+            setTimeout(() => {
+                const amount = 500;
+                updateBalanceAndTransaction(amount, 'YouTube Subscribe Task Completed');
+                markTaskCompleted('youtube');
+                alert(`Congratulations! You earned ${amount} keys!`);
+                
+                // Update button state
+                const button = document.querySelector('[onclick="openYouTube()"]');
+                button.classList.add('completed');
+                button.textContent = 'Completed';
+                button.disabled = true;
+            }, 1000);
+        }
+
+        function claimDaily(day) {
+            const element = document.querySelectorAll('.ripple-day')[day - 1];
+            
+            // Check if already claimed or previous day not claimed
+            if (element.classList.contains('claimed') || 
+                (day > 1 && !document.querySelectorAll('.ripple-day')[day - 2].classList.contains('claimed'))) {
+                return;
+            }
+
+            // Add claimed class and animation
+            element.classList.add('claimed', 'claimed-animation');
+            
+            // Remove animation class after it completes
+            setTimeout(() => {
+                element.classList.remove('claimed-animation');
+            }, 500);
+
+            // Show reward message
+            const keys = day === 5 ? 1000 : day * 100;
+            alert(`Congratulations! You've earned ${keys} keys!`);
+
+            // Lock future days
+            for (let i = day; i < 5; i++) {
+                if (!document.querySelectorAll('.ripple-day')[i].classList.contains('claimed')) {
+                    document.querySelectorAll('.ripple-day')[i].classList.add('locked');
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load current balance
+            const currentBalance = getCurrentBalance();
+            document.getElementById('balance').textContent = currentBalance;
+            
+            // Check and update task states
+            if (isTaskCompletedToday('video')) {
+                const videoButton = document.querySelector('[onclick="watchVideo()"]');
+                videoButton.classList.add('completed');
+                videoButton.textContent = 'Completed';
+                videoButton.disabled = true;
+            }
+            
+            if (isTaskCompletedToday('share')) {
+                const shareButton = document.querySelector('[onclick="shareApp()"]');
+                shareButton.classList.add('completed');
+                shareButton.textContent = 'Completed';
+                shareButton.disabled = true;
+            }
+            
+            if (isTaskCompletedToday('youtube')) {
+                const youtubeButton = document.querySelector('[onclick="openYouTube()"]');
+                youtubeButton.classList.add('completed');
+                youtubeButton.textContent = 'Completed';
+                youtubeButton.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
